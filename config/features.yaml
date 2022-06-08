@@ -27,3 +27,10 @@
   limits: [0, 7]
   discretizer: uniform:6
   scaler: min_max
+
+- name: n_bedrooms
+  type: int
+  imputation_strategy: constant:0
+  limits: [0, 8]
+  discretizer: uniform:7
+  scaler: min_max
