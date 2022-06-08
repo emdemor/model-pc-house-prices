@@ -3,7 +3,15 @@ import git
 import pandas as pd
 
 
-def get_last_git_tag():
+def get_last_git_tag() -> str:
+    """
+    Get the latest git tag.
+
+    Returns
+    -------
+    str
+        Latest git tag
+    """
 
     repo = git.Repo()
 
