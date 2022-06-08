@@ -30,15 +30,18 @@ def get_last_git_tag() -> str:
     return latest_tag
 
 
-def to_snake_case(name):
+def to_snake_case(string):
 
-    name = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", name)
+    string = string.strip().replace(" ", "_")
 
-    name = re.sub("([a-z0-9])([A-Z])", r"\1_\2", name).lower()
+    string = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", string)
 
-    name = name.replace("__", "_")
+    string = re.sub("([a-z0-9])([A-Z])", r"\1_\2", string).lower()
 
-    return name
+    while "__" in string:
+        string = string.replace("__", "_")
+
+    return string
 
 
 def dataframe_transformer(dataframe, transformer):
