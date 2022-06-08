@@ -2,6 +2,8 @@ import re
 import git
 import pandas as pd
 
+from sklearn.base import TransformerMixin
+
 
 def get_last_git_tag() -> str:
     """
@@ -55,8 +57,27 @@ def to_snake_case(string: str) -> str:
     return string
 
 
-def dataframe_transformer(dataframe, transformer):
+def dataframe_transformer(
+    dataframe: pd.DataFrame, transformer: TransformerMixin
+) -> pd.DataFrame:
+    """
+    Applies a sklearn transformation to a dataframe e converts the
+    results in dataframes to, with the same column names. The transformations
+    where the column numbers is changed, as PolinomialFeatures and PCA are
+    not suported by this method.
 
+    Parameters
+    ----------
+    dataframe : pd.DataFrame
+        Input dataframe
+    transformer : TransformerMixin
+        Scikit-Learn-like transformation to be applied
+
+    Returns
+    -------
+    pd.DataFrame
+        The transformed dataframe
+    """
     transformed_array = transformer.transform(dataframe)
 
     if transformed_array.shape[1] == len(dataframe.columns):
