@@ -20,17 +20,10 @@
   limits: [0, 7]
   discretizer: uniform:6
   scaler: min_max
-# - name: n_bathrooms
-#   type: int
-#   imputation_strategy: "mean"
-# - name: Cholesterol
-#   type: int
-#   imputation_strategy: 0
 
-# - name: Na_to_K
-#   type: float
-#   imputation_strategy: mean
-#   #limits: [0, 100]
-#   transformation: square
-#   discretizer: quantile:12
-#   scaler: min_max
+- name: n_bathrooms
+  type: int
+  imputation_strategy: constant:0
+  limits: [0, 7]
+  discretizer: uniform:6
+  scaler: min_max
