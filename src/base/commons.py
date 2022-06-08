@@ -30,8 +30,19 @@ def get_last_git_tag() -> str:
     return latest_tag
 
 
-def to_snake_case(string):
+def to_snake_case(string: str) -> str:
+    """Converts a string to snake case.
 
+    Parameters
+    ----------
+    string : str
+        Any input string
+
+    Returns
+    -------
+    str
+        The string converted to snake case format
+    """
     string = string.strip().replace(" ", "_")
 
     string = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", string)
