@@ -27,11 +27,7 @@ def make_dataset(config: dict, download_bases: bool = False):
     data = pd.read_parquet(config["data_raw_basic_path"])
     assert data is not None
 
-    X = data.drop(columns="price", errors="ignore")
-
-    y = data["price"]
-
-    return X, y
+    return data
 
 
 def data_extraction_basic(config: dict):

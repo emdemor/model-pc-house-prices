@@ -2,34 +2,42 @@ import numpy as np
 import pandas as pd
 from sklearn.base import BaseEstimator, TransformerMixin
 
+TARGET_COLUMN = "price"
+TARGET_SCALE = "log10"  # 'log', 'log10', 'log1p', 'log101p
+TARGET_TRANSFORMATIONS = {
+    "log": np.log,
+    "log10": np.log10,
+    "log1p": np.log1p,
+    "log101p": lambda x: np.log10(1 + x),
+}
 
-def build_features(X: pd.DataFrame, y: pd.Series) -> tuple:
 
-    X["Sex"] = X["Sex"].replace(
-        {
-            "F": 0,
-            "M": 1,
-        }
-    )
+def build_features(data: pd.DataFrame) -> tuple:
 
-    X["BP_LOW"] = (X["BP"] == "LOW").astype("Int8")
-    X["BP_HIGH"] = (X["BP"] == "HIGH").astype("Int8")
+    data = clear_dataset(data)
 
-    X["Cholesterol"] = X["Cholesterol"].replace(
-        {
-            "NORMAL": 0,
-            "HIGH": 1,
-        }
-    )
+    X = data.drop(columns=TARGET_COLUMN, errors="ignore")
 
-    y = y.replace(
-        {
-            "drugA": 1,
-            "drugB": 2,
-            "drugC": 3,
-            "drugX": 4,
-            "DrugY": 5,
-        }
-    )
+    y = transform_target(data[TARGET_COLUMN])
 
     return X, y
+
+
+def transform_target(y: pd.Series) -> pd.Series:
+
+    y = TARGET_TRANSFORMATIONS[TARGET_SCALE](y)
+
+    y.name = TARGET_SCALE + "_" + y.name
+
+    return y
+
+
+def clear_dataset(data: pd.DataFrame) -> pd.DataFrame:
+
+    # remove registers where response variable is null
+    clean_data = data.loc[data[TARGET_COLUMN].notna()]
+
+    # remove registers where response variable is zero
+    clean_data = data.loc[data[TARGET_COLUMN] > 0]
+
+    return clean_data
