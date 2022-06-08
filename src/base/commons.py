@@ -7,7 +7,17 @@ def get_last_git_tag():
 
     repo = git.Repo()
 
-    latest_tag = sorted(repo.tags, key=lambda t: t.commit.committed_datetime)[-1].name
+    latest_tag = None
+
+    try:
+        latest_tag = sorted(repo.tags, key=lambda t: t.commit.committed_datetime)[
+            -1
+        ].name
+
+    except IndexError:
+        raise IndexError(
+            "No git tags found. You can add one through `git tag <tag_name>`"
+        )
 
     return latest_tag
 
