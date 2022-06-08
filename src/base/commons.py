@@ -56,8 +56,22 @@ def to_snake_case(string: str) -> str:
 
 
 def dataframe_transformer(dataframe, transformer):
-    return pd.DataFrame(
-        transformer.transform(dataframe),
-        index=dataframe.index,
-        columns=dataframe.columns,
-    )
+
+    transformed_array = transformer.transform(dataframe)
+
+    if transformed_array.shape[1] == len(dataframe.columns):
+        result = pd.DataFrame(
+            transformed_array,
+            index=dataframe.index,
+            columns=dataframe.columns,
+        )
+
+    else:
+        raise ValueError(
+            """The transformation do not preserve the number \
+        of columns. So, the transformed data cannot be converted to a dataframe \
+        with same column names.
+        """
+        )
+
+    return result
