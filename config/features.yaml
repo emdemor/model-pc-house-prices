@@ -1,0 +1,39 @@
+###################################################
+# EXEMPLOS DE CONFIGURAÇÕES
+#
+# Atenção: as etapas de preprocessamento irão ocorrer
+# na ordem que forem especificadas nesse arquivo.
+#
+# >>> Exemplo:
+# - name: nome_da_feature
+#   type: float
+#   imputation_strategy: constant:0 #(mean, median, constant:<value>)
+#   limits: [0.0, 1705.0]
+#   transformation: identity # (log, log10, log1p, exp, square, sqrt, identity)
+#   discretizer: kmeans:3 # (uniform, quantile)
+#   scaler: robust #, (min_max, standard, robust)
+#   weight: 1
+
+- name: Age
+  type: float
+  imputation_strategy: mean
+  limits: [0, 100]
+  transformation: sqrt
+  discretizer: kmeans:5
+  scaler: min_max
+
+- name: Sex
+  type: int
+  imputation_strategy: 0
+
+- name: Cholesterol
+  type: int
+  imputation_strategy: 0
+
+- name: Na_to_K
+  type: float
+  imputation_strategy: mean
+  #limits: [0, 100]
+  transformation: square
+  discretizer: quantile:12
+  scaler: min_max

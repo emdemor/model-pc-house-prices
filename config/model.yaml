@@ -1,0 +1,4 @@
+data_raw_basic_path: data/raw/basic/
+data_raw_amenities_path: data/raw/amenities/
+data_raw_poi_path: data/raw/poi/
+data_raw_descriptions_path: data/raw/descriptions/

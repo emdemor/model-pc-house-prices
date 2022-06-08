@@ -1,0 +1,9 @@
+GitPython==3.1.27
+matplotlib==3.5.2
+pandas==1.4.2
+psycopg2-binary==2.9.3
+python-dotenv==0.20.0
+PyYAML==6.0
+requests==2.27.1
+scikit-learn==1.1.1
+sqlalchemy==1.1.2
