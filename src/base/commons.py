@@ -61,9 +61,9 @@ def dataframe_transformer(
     dataframe: pd.DataFrame, transformer: TransformerMixin
 ) -> pd.DataFrame:
     """
-    Applies a sklearn transformation to a dataframe e converts the
-    results in dataframes to, with the same column names. The transformations
-    where the column numbers is changed, as PolinomialFeatures and PCA are
+    Applies a sklearn transformation to the input dataframe and converts the
+    resulting array in a dataframe, with the same column names. The transformations
+    where the column numbers is changed, as PolinomialFeatures and PCA for example are
     not suported by this method.
 
     Parameters
