@@ -82,12 +82,19 @@ def dataset_treatment(data: pd.DataFrame) -> pd.DataFrame:
         ["n_parking_spaces", "n_bathrooms", "n_bedrooms"],
     ] = np.nan
 
-    # -- mapping types -----
+    # -- Unificando tipos comuns -----
     data["type"] = data["type"].replace(TYPE_MAPPING)
 
-    # -- generate dummy variables for type ------
+    # -- Gerando variáveis dummy para is tipos ------
     categories = ["APARTMENT", "HOME", "ALLOTMENT_LAND", "COUNTRY"]
     data = generate_dummy_variables(data, "type", categories, prefix="column")
+
+    # -- Anulando os casos onde a área é zero ------------
+    data.loc[
+        (data["type"].isin(["ALLOTMENT_LAND", "COUNTRY", "BUSINESS"]))
+        & (data["area"] == 0),
+        ["area"],
+    ] = np.nan
 
     return data
 
