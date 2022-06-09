@@ -16,6 +16,8 @@ def build_features(data: pd.DataFrame) -> tuple:
 
     data = clear_dataset(data)
 
+    data = dataset_treatment(data)
+
     X = data.drop(columns=TARGET_COLUMN, errors="ignore")
 
     y = transform_target(data[TARGET_COLUMN])
@@ -41,3 +43,22 @@ def clear_dataset(data: pd.DataFrame) -> pd.DataFrame:
     clean_data = data.loc[data[TARGET_COLUMN] > 0]
 
     return clean_data
+
+
+def dataset_treatment(data: pd.DataFrame) -> pd.DataFrame:
+
+    # -- Imóveis do tipo Hoteis são muito peculiares --------
+    data = data.loc(data["type"] == "HOTEL", errors="ignore")
+
+    # -- Terrenos não tem certas propriedades ----------
+    data["n_parking_spaces"] = np.where(
+        data["type"].contains("ALLOTMENT"), np.nan, data["n_parking_spaces"]
+    )
+    data["n_bathrooms"] = np.where(
+        data["type"].contains("ALLOTMENT"), np.nan, data["n_bathrooms"]
+    )
+    data["n_bedrooms"] = np.where(
+        data["type"].contains("ALLOTMENT"), np.nan, data["n_bedrooms"]
+    )
+
+    return data
