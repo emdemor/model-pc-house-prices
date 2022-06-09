@@ -34,3 +34,6 @@
   limits: [0, 8]
   discretizer: uniform:7
   scaler: min_max
+
+- name: area
+  type: float
