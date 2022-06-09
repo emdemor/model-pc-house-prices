@@ -37,3 +37,19 @@
 
 - name: area
   type: float
+  transformation: log10
+  imputation_strategy: constant:1.90
+  limits: [1.3, 4]
+  discretizer: kmeans:10
+
+- name: type_APARTMENT
+  type: int
+
+- name: type_HOME
+  type: int
+
+- name: type_ALLOTMENT_LAND
+  type: int
+
+- name: type_COUNTRY
+  type: int
