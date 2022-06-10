@@ -42,6 +42,11 @@
   limits: [1.3, 4]
   discretizer: kmeans:10
 
+- name: n_suites
+  type: int
+  limits: [0, 4]
+  imputation_strategy: constant:0
+
 - name: type_APARTMENT
   type: int
 
