@@ -47,6 +47,16 @@
   limits: [0, 4]
   imputation_strategy: constant:0
 
+- name: latitude
+  type: float
+  imputation_strategy: constant:-21.797
+  limits: [-21.9, -21.7]
+
+- name: longitude
+  type: float
+  imputation_strategy: constant:-46.57
+  limits: [-46.7, -46.4]
+
 - name: type_APARTMENT
   type: int
 
@@ -58,3 +68,6 @@
 
 - name: type_COUNTRY
   type: int
+
+- name: neighborhood
+  type: string
