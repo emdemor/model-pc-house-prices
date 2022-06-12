@@ -8,10 +8,6 @@ import unidecode
 from src.base.commons import to_snake_case
 
 
-TARGET_COLUMN = "price"
-
-TARGET_SCALE = "log10"  # 'log', 'log10', 'log1p', 'log101p
-
 TARGET_TRANSFORMATIONS = {
     "log": np.log,
     "log10": np.log10,
@@ -19,32 +15,7 @@ TARGET_TRANSFORMATIONS = {
     "log101p": lambda x: np.log10(1 + x),
 }
 
-TYPE_MAPPING = {
-    # -- home -----
-    "TWO_STORY_HOUSE": "HOME",
-    "CONDOMINIUM": "HOME",
-    # -- apartment -----
-    "FLAT": "APARTMENT",
-    "KITNET": "APARTMENT",
-    "PENTHOUSE": "APARTMENT",
-    # -- allotment land -----
-    "RESIDENTIAL_ALLOTMENT_LAND": "ALLOTMENT_LAND",
-    "COMMERCIAL_ALLOTMENT_LAND": "ALLOTMENT_LAND",
-    # -- business -----
-    "SHED_DEPOSIT_WAREHOUSE": "BUSINESS",
-    "BUSINESS": "BUSINESS",
-    "COMMERCIAL_PROPERTY": "BUSINESS",
-    "COMMERCIAL_BUILDING": "BUSINESS",
-    "OFFICE": "BUSINESS",
-    "HOTEL": "BUSINESS",
-    # -- country -----
-    "COUNTRY_HOUSE": "COUNTRY",
-    "FARM": "COUNTRY",
-}
-
-LONG_INTERVAL = [-46.7, -46.4]
-
-LAT_INTERVAL = [-21.9, -21.76]
+PARAMETERS_CONFIG = get_config(filename="config/parameters.yaml")
 
 
 def build_features(data: pd.DataFrame) -> tuple:
@@ -57,10 +28,10 @@ def build_features(data: pd.DataFrame) -> tuple:
 
     data = build_date_features(data)
 
-    X = data.drop(columns=TARGET_COLUMN, errors="ignore")
+    X = data.drop(columns=[PARAMETERS_CONFIG["TARGET_COLUMN"]], errors="ignore")
 
-    if TARGET_COLUMN in data.columns:
-        y = transform_target(data[TARGET_COLUMN])
+    if PARAMETERS_CONFIG["TARGET_COLUMN"] in data.columns:
+        y = transform_target(data[PARAMETERS_CONFIG["TARGET_COLUMN"]])
     else:
         y = None
 
@@ -69,22 +40,22 @@ def build_features(data: pd.DataFrame) -> tuple:
 
 def transform_target(y: pd.Series) -> pd.Series:
 
-    y = TARGET_TRANSFORMATIONS[TARGET_SCALE](y)
+    y = TARGET_TRANSFORMATIONS[PARAMETERS_CONFIG["TARGET_SCALE"]](y)
 
-    y.name = TARGET_SCALE + "_" + y.name
+    y.name = PARAMETERS_CONFIG["TARGET_SCALE"] + "_" + y.name
 
     return y
 
 
 def clear_dataset(data: pd.DataFrame) -> pd.DataFrame:
 
-    if TARGET_COLUMN in data.columns:
+    if PARAMETERS_CONFIG["TARGET_COLUMN"] in data.columns:
 
         # remove registers where response variable is null
-        data = data.loc[data[TARGET_COLUMN].notna()]
+        data = data.loc[data[PARAMETERS_CONFIG["TARGET_COLUMN"]].notna()]
 
         # remove registers where response variable is zero
-        data = data.loc[data[TARGET_COLUMN] > 0]
+        data = data.loc[data[PARAMETERS_CONFIG["TARGET_COLUMN"]] > 0]
 
     return data
 
@@ -142,7 +113,7 @@ def treat_type(data: pd.DataFrame) -> pd.DataFrame:
     ] = np.nan
 
     # -- Unificando tipos comuns -----
-    data["type"] = data["type"].replace(TYPE_MAPPING)
+    data["type"] = data["type"].replace(PARAMETERS_CONFIG["TYPE_MAPPING"])
 
     # -- Gerando variáveis dummy para os tipos ------
     categories = ["APARTMENT", "HOME", "ALLOTMENT_LAND", "COUNTRY"]
@@ -167,9 +138,9 @@ def treat_latlong(data: pd.DataFrame) -> pd.DataFrame:
     data.loc[data["latitude"] > -10, "latitude"] = np.nan
 
     # -- tratando os casos onde latitude e longitude estão invertidas
-    conditions_lat_long_inverted = data["latitude"].between(*LONG_INTERVAL) & data[
-        "longitude"
-    ].between(*LAT_INTERVAL)
+    conditions_lat_long_inverted = data["latitude"].between(
+        *PARAMETERS_CONFIG["LONG_INTERVAL"]
+    ) & data["longitude"].between(*PARAMETERS_CONFIG["LAT_INTERVAL"])
 
     if conditions_lat_long_inverted.sum() > 0:
         values = data.loc[conditions_lat_long_inverted][
@@ -180,8 +151,12 @@ def treat_latlong(data: pd.DataFrame) -> pd.DataFrame:
         data.loc[conditions_lat_long_inverted, "longitude"] = values["latitude"]
 
     # -- Anulando as latitudes e longitudes fora do intervalo -----
-    data.loc[~data["latitude"].between(*LAT_INTERVAL), "latitude"] = np.nan
-    data.loc[~data["longitude"].between(*LONG_INTERVAL), "longitude"] = np.nan
+    data.loc[
+        ~data["latitude"].between(*PARAMETERS_CONFIG["LAT_INTERVAL"]), "latitude"
+    ] = np.nan
+    data.loc[
+        ~data["longitude"].between(*PARAMETERS_CONFIG["LONG_INTERVAL"]), "longitude"
+    ] = np.nan
 
     # -- distancia do centro ----------------------------
     data["dist_manh"] = np.abs(data["longitude"] - center_coords[0]) + np.abs(
