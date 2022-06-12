@@ -5,11 +5,57 @@ import numpy as np
 
 from src.base.commons import to_snake_case
 from src.base.file import read_file_string, download_file
+from src.config import get_config
 from src.model import __version__
 
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from basix.parquet import write as to_parquet
+
+
+PARAMETERS_CONFIG = get_config(filename="config/parameters.yaml")
+TARGET_TRANSFORMATIONS = {
+    "log": np.log,
+    "log10": np.log10,
+    "log1p": np.log1p,
+    "log101p": lambda x: np.log10(1 + x),
+}
+
+
+def make_dataset(config: dict, extract_data: bool = False) -> pd.DataFrame:
+    if extract_data:
+        extract_dataset(config)
+
+    data_basic = pd.read_parquet(config["data_raw_basic_path"])
+
+    # TODO
+    # Inserir aqui os dados construidos a partir de
+    # 1. Amenities
+    # 2. Description
+    # 3. Points of Interest
+    data = data_basic
+
+    # Remover os registros onde a variável responsta
+    # é nula (ou zero, no caso de preço)
+    data = remove_invalid_registers(data)
+
+    X = data.drop(columns=[PARAMETERS_CONFIG["TARGET_COLUMN"]], errors="ignore")
+
+    if PARAMETERS_CONFIG["TARGET_COLUMN"] in data.columns:
+        y = transform_target(data[PARAMETERS_CONFIG["TARGET_COLUMN"]])
+    else:
+        y = None
+
+    return X, y
+
+
+def transform_target(y: pd.Series) -> pd.Series:
+
+    y = TARGET_TRANSFORMATIONS[PARAMETERS_CONFIG["TARGET_SCALE"]](y)
+
+    y.name = PARAMETERS_CONFIG["TARGET_SCALE"] + "_" + y.name
+
+    return y
 
 
 def extract_dataset(config: dict) -> None:
@@ -29,17 +75,18 @@ def extract_dataset(config: dict) -> None:
         raise Exception
 
 
-def treat_training_dataset(config: dict):
+def remove_invalid_registers(data: pd.DataFrame) -> pd.DataFrame:
 
-    data_basic = pd.read_parquet(config["data_raw_basic_path"])
-    assert data_basic is not None
+    if PARAMETERS_CONFIG["TARGET_COLUMN"] in data.columns:
 
-    # TODO
-    # Inserir aqui os dados construidos a partir de
-    # 1. Amenities
-    # 2. Description
-    # 3. Points of Interest
-    data = data_basic
+        # remove registers where response variable is null
+        data = data.loc[data[PARAMETERS_CONFIG["TARGET_COLUMN"]].notna()]
+
+        # remove registers where response variable is zero
+        data = data.loc[data[PARAMETERS_CONFIG["TARGET_COLUMN"]] > 0]
+
+    # -- Imóveis do tipo Hoteis são muito peculiares --------
+    data = data.loc[data["type"] != "HOTEL"].copy()
 
     return data
 
