@@ -1,6 +1,6 @@
 TARGET_COLUMN: "price"
 
-TARGET_SCALE: "log10" # 'log', 'log10', 'log1p', 'log101p
+TARGET_SCALE: "identity" # 'log', 'log10', 'log1p', 'log101p
 
 TYPE_MAPPING:
   # -- home -----
