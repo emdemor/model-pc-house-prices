@@ -8,54 +8,16 @@ import unidecode
 from src.base.commons import to_snake_case
 
 
-TARGET_TRANSFORMATIONS = {
-    "log": np.log,
-    "log10": np.log10,
-    "log1p": np.log1p,
-    "log101p": lambda x: np.log10(1 + x),
-}
-
 PARAMETERS_CONFIG = get_config(filename="config/parameters.yaml")
 
 
 def build_features(data: pd.DataFrame) -> tuple:
-
-    data = clear_dataset(data)
 
     data = dataset_treatment(data)
 
     data = construct_features(data)
 
     data = build_date_features(data)
-
-    X = data.drop(columns=[PARAMETERS_CONFIG["TARGET_COLUMN"]], errors="ignore")
-
-    if PARAMETERS_CONFIG["TARGET_COLUMN"] in data.columns:
-        y = transform_target(data[PARAMETERS_CONFIG["TARGET_COLUMN"]])
-    else:
-        y = None
-
-    return X, y
-
-
-def transform_target(y: pd.Series) -> pd.Series:
-
-    y = TARGET_TRANSFORMATIONS[PARAMETERS_CONFIG["TARGET_SCALE"]](y)
-
-    y.name = PARAMETERS_CONFIG["TARGET_SCALE"] + "_" + y.name
-
-    return y
-
-
-def clear_dataset(data: pd.DataFrame) -> pd.DataFrame:
-
-    if PARAMETERS_CONFIG["TARGET_COLUMN"] in data.columns:
-
-        # remove registers where response variable is null
-        data = data.loc[data[PARAMETERS_CONFIG["TARGET_COLUMN"]].notna()]
-
-        # remove registers where response variable is zero
-        data = data.loc[data[PARAMETERS_CONFIG["TARGET_COLUMN"]] > 0]
 
     return data
 
@@ -102,9 +64,6 @@ def construct_features(data: pd.DataFrame) -> pd.DataFrame:
 
 
 def treat_type(data: pd.DataFrame) -> pd.DataFrame:
-
-    # -- Imóveis do tipo Hoteis são muito peculiares --------
-    data = data.loc[data["type"] != "HOTEL"].copy()
 
     # -- Terrenos não tem certas propriedades ----------
     data.loc[
@@ -174,9 +133,9 @@ def treat_latlong(data: pd.DataFrame) -> pd.DataFrame:
 
 def treat_neighborhood(data: pd.DataFrame) -> pd.DataFrame:
     def decode(x):
-        if x is not None:
+        try:
             return unidecode.unidecode(x)
-        else:
+        except:
             return x
 
     try:
@@ -190,9 +149,13 @@ def treat_neighborhood(data: pd.DataFrame) -> pd.DataFrame:
 
     data["neighborhood"] = data["neighborhood"].apply(decode)
 
-    data["neighborhood"] = data["neighborhood"].apply(
-        lambda x: to_snake_case(x) if x is not None else None
-    )
+    def convert_to_snake_case(x):
+        try:
+            return to_snake_case(x)
+        except:
+            return x
+
+    data["neighborhood"] = data["neighborhood"].apply(convert_to_snake_case)
 
     data.loc[data["neighborhood"] == "", "neighborhood"] = None
 
