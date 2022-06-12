@@ -16,22 +16,24 @@ def make_dataset(config: dict, download_bases: bool = False):
 
     if download_bases:
         logging.info("Download basic features")
-        data_extraction_basic(config)
+        extract_scrapped_relational_data(config)
 
         logging.info("Download amenities features")
-        data_extraction_amenities(config)
+        extract_scrapped_amenities_data(config)
 
         logging.info("Download descriptions")
-        data_extraction_description(config)
+        extrac_scrapped_description_data(config)
 
     data = pd.read_parquet(config["data_raw_basic_path"])
 
     assert data is not None
 
+    to_parquet(data, "data/raw/scrapped_relational_data")
+
     return data
 
 
-def data_extraction_basic(config: dict):
+def extract_scrapped_relational_data(config: dict):
 
     assert load_dotenv()
 
@@ -94,7 +96,7 @@ def data_extraction_basic(config: dict):
     )
 
 
-def data_extraction_amenities(config: dict):
+def extract_scrapped_amenities_data(config: dict):
 
     assert load_dotenv()
 
@@ -173,7 +175,7 @@ def data_extraction_amenities(config: dict):
 #     )
 
 
-def data_extraction_description(config: dict):
+def extrac_scrapped_description_data(config: dict):
 
     assert load_dotenv()
 
