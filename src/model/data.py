@@ -22,7 +22,7 @@ def extract_dataset(config: dict, download_bases: bool = False):
         extract_scrapped_amenities_data(config)
 
         logging.info("Download descriptions")
-        extrac_scrapped_description_data(config)
+        extract_scrapped_description_data(config)
 
     data = pd.read_parquet(config["data_raw_basic_path"])
 
@@ -173,7 +173,7 @@ def extract_scrapped_amenities_data(config: dict):
 #     )
 
 
-def extrac_scrapped_description_data(config: dict):
+def extract_scrapped_description_data(config: dict):
 
     assert load_dotenv()
 
