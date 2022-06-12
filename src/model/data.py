@@ -12,7 +12,7 @@ from sqlalchemy import create_engine
 from basix.parquet import write as to_parquet
 
 
-def make_dataset(config: dict, download_bases: bool = False):
+def extract_dataset(config: dict, download_bases: bool = False):
 
     if download_bases:
         logging.info("Download basic features")
@@ -27,8 +27,6 @@ def make_dataset(config: dict, download_bases: bool = False):
     data = pd.read_parquet(config["data_raw_basic_path"])
 
     assert data is not None
-
-    to_parquet(data, "data/raw/scrapped_relational_data")
 
     return data
 
