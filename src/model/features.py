@@ -1,3 +1,4 @@
+from src.base.logger import logging
 import unidecode
 from typing import Any
 import numpy as np
@@ -11,24 +12,15 @@ from src.base.commons import to_snake_case
 PARAMETERS_CONFIG = get_config(filename="config/parameters.yaml")
 
 
-def build_features(data: pd.DataFrame) -> tuple:
+def build_features(data: pd.DataFrame) -> pd.DataFrame:
 
-    data = dataset_treatment(data)
-
-    data = construct_features(data)
+    data = build_type_features(data)
 
     data = build_date_features(data)
 
-    return data
+    data = fill_latlong_by_neighbor(data)
 
-
-def dataset_treatment(data: pd.DataFrame) -> pd.DataFrame:
-
-    data = treat_type(data)
-
-    data = treat_latlong(data)
-
-    data = treat_neighborhood(data)
+    data = build_distance_features(data)
 
     return data
 
@@ -56,68 +48,23 @@ def generate_dummy_variables(
     return dataframe
 
 
-def construct_features(data: pd.DataFrame) -> pd.DataFrame:
-
-    # data["has_condo_fee"] = np.where(data["condo_fee"] > 0, 1, 0)
-
-    return data
-
-
-def treat_type(data: pd.DataFrame) -> pd.DataFrame:
-
-    # -- Terrenos não tem certas propriedades ----------
-    data.loc[
-        data["type"].str.contains("ALLOTMENT"),
-        ["n_parking_spaces", "n_bathrooms", "n_bedrooms"],
-    ] = np.nan
-
-    # -- Unificando tipos comuns -----
-    data["type"] = data["type"].replace(PARAMETERS_CONFIG["TYPE_MAPPING"])
+def build_type_features(data: pd.DataFrame) -> pd.DataFrame:
 
     # -- Gerando variáveis dummy para os tipos ------
-    categories = ["APARTMENT", "HOME", "ALLOTMENT_LAND", "COUNTRY"]
-    data = generate_dummy_variables(data, "type", categories, prefix="column")
 
-    # -- Anulando os casos onde a área é zero ------------
-    data.loc[
-        (data["type"].isin(["ALLOTMENT_LAND", "COUNTRY", "BUSINESS"]))
-        & (data["area"] == 0),
-        ["area"],
-    ] = np.nan
+    categories = ["APARTMENT", "HOME", "ALLOTMENT_LAND", "COUNTRY"]
+
+    data = generate_dummy_variables(data, "type", categories, prefix="column")
 
     return data
 
 
-def treat_latlong(data: pd.DataFrame) -> pd.DataFrame:
+def build_distance_features(data: pd.DataFrame) -> pd.DataFrame:
+
+    # -- distancia do centro ----------------------------
 
     center_coords = np.array([-46.567079, -21.790012])
 
-    # -- Removendo as latitudes e longitudes zeradas ---------
-    data.loc[data["longitude"] > -10, "longitude"] = np.nan
-    data.loc[data["latitude"] > -10, "latitude"] = np.nan
-
-    # -- tratando os casos onde latitude e longitude estão invertidas
-    conditions_lat_long_inverted = data["latitude"].between(
-        *PARAMETERS_CONFIG["LONG_INTERVAL"]
-    ) & data["longitude"].between(*PARAMETERS_CONFIG["LAT_INTERVAL"])
-
-    if conditions_lat_long_inverted.sum() > 0:
-        values = data.loc[conditions_lat_long_inverted][
-            ["latitude", "longitude"]
-        ].to_dict(orient="records")[0]
-
-        data.loc[conditions_lat_long_inverted, "latitude"] = values["longitude"]
-        data.loc[conditions_lat_long_inverted, "longitude"] = values["latitude"]
-
-    # -- Anulando as latitudes e longitudes fora do intervalo -----
-    data.loc[
-        ~data["latitude"].between(*PARAMETERS_CONFIG["LAT_INTERVAL"]), "latitude"
-    ] = np.nan
-    data.loc[
-        ~data["longitude"].between(*PARAMETERS_CONFIG["LONG_INTERVAL"]), "longitude"
-    ] = np.nan
-
-    # -- distancia do centro ----------------------------
     data["dist_manh"] = np.abs(data["longitude"] - center_coords[0]) + np.abs(
         data["latitude"] - center_coords[1]
     )
@@ -131,56 +78,39 @@ def treat_latlong(data: pd.DataFrame) -> pd.DataFrame:
     return data
 
 
-def treat_neighborhood(data: pd.DataFrame) -> pd.DataFrame:
-    def decode(x):
-        try:
-            return unidecode.unidecode(x)
-        except:
-            return x
+def build_date_features(data: pd.DataFrame) -> pd.DataFrame:
 
-    try:
-        maps = get_config(filename="config/neighbor_rename.yaml")
-    except:
-        maps = {}
+    data["search_date"] = list(data["search_date"])
 
-    data["neighborhood"] = data["neighborhood"].str.strip()
+    data["time_delta"] = (
+        pd.to_datetime(data["search_date"]) - pd.to_datetime("2021-01-01")
+    ).dt.days
 
-    data["neighborhood"] = data["neighborhood"].replace(maps)
+    data["year"] = pd.to_datetime(data["search_date"]).dt.year
 
-    data["neighborhood"] = data["neighborhood"].apply(decode)
+    data["month"] = pd.to_datetime(data["search_date"]).dt.month
 
-    def convert_to_snake_case(x):
-        try:
-            return to_snake_case(x)
-        except:
-            return x
-
-    data["neighborhood"] = data["neighborhood"].apply(convert_to_snake_case)
-
-    data.loc[data["neighborhood"] == "", "neighborhood"] = None
-
-    data.loc[
-        data["neighborhood"].fillna("").str.contains("chacara"), "neighborhood"
-    ] = "zona_rural"
-
-    # data = pd.concat(
-    #     [
-    #         data.drop(columns="neighborhood"),
-    #         pd.get_dummies(data["neighborhood"], prefix="neighbor"),
-    #     ],
-    #     axis=1,
-    # )
+    data["day"] = pd.to_datetime(data["search_date"]).dt.day
 
     return data
 
 
-def build_date_features(data: pd.DataFrame) -> pd.DataFrame:
-    data["search_date"] = list(data["search_date"])
-    data["time_delta"] = (
-        pd.to_datetime(data["search_date"]) - pd.to_datetime("2021-01-01")
-    ).dt.days
-    data["year"] = pd.to_datetime(data["search_date"]).dt.year
-    data["month"] = pd.to_datetime(data["search_date"]).dt.month
-    data["day"] = pd.to_datetime(data["search_date"]).dt.day
+def fill_latlong_by_neighbor(data: pd.DataFrame) -> pd.DataFrame:
+
+    # -- Preenchendo os latlongs faltantes com as coordenadas dos bairros
+
+    try:
+        data["longitude"] = np.where(
+            data["longitude"].isna(), data["neighbor_longitude"], data["longitude"]
+        )
+    except Exception as err:
+        logging.warning(err)
+
+    try:
+        data["latitude"] = np.where(
+            data["latitude"].isna(), data["neighbor_latitude"], data["latitude"]
+        )
+    except Exception as err:
+        logging.warning(err)
 
     return data
