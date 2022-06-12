@@ -17,6 +17,8 @@ from sklearn.preprocessing import (
 from sklearn import compose
 from sklearn.pipeline import Pipeline
 
+from xtlearn.metrics import eval_information_value
+
 # from IPython.display import display
 
 
@@ -367,7 +369,7 @@ class FeatureImputer(BaseEstimator, TransformerMixin):
 
         self.parameter = parameter
 
-        self.imputer = self.__interpret_imputation(self.strategy, self.parameter)
+        self.imputer = None
 
     def fit(self, X: pd.DataFrame, y: pd.Series = None) -> FeatureImputer:
         """Fit imputer using X.
@@ -384,6 +386,8 @@ class FeatureImputer(BaseEstimator, TransformerMixin):
         self : FeatureImputer
             This estimator.
         """
+
+        self.imputer = self.__interpret_imputation(self.strategy, self.parameter)
         self.imputer.fit(X)
         return self
 
@@ -834,7 +838,11 @@ class PreProcessor(BaseEstimator, TransformerMixin):
 
         features = self.__get_active_features()
 
-        return dataframe_transformer(X[features], self.preprocessor)
+        X_transf = dataframe_transformer(X[features], self.preprocessor)
+
+        X_transf = self.__cast_columns(X_transf)
+
+        return X_transf
 
     def fit_transform(self, X: pd.DataFrame, y: pd.Series = None) -> pd.DataFrame:
         """Fit using X and return the transformed dataframe.
@@ -960,9 +968,9 @@ class PreProcessor(BaseEstimator, TransformerMixin):
             ].sort_values("feature_order")
 
             transformers = [
-                (n, self.__interpret_process_step(key, value), [o])
-                for n, o, key, value in df_step[
-                    ["feature_name", "feature_order", "key", "value"]
+                (n, self.__interpret_process_step(key, value, tp), [o])
+                for n, o, key, value, tp in df_step[
+                    ["feature_name", "feature_order", "key", "value", "type"]
                 ].to_numpy()
             ]
 
@@ -989,7 +997,7 @@ class PreProcessor(BaseEstimator, TransformerMixin):
             )
         ]
 
-    def __interpret_process_step(self, key, value):
+    def __interpret_process_step(self, key, value, type_):
         if key == "transformation":
             return FeatureTransformer(transformation=value)
 
@@ -1001,7 +1009,10 @@ class PreProcessor(BaseEstimator, TransformerMixin):
             strategy, *param = str(value).split(":")
 
             if strategy == "constant":
-                param = float(param[0])
+                if type_ in ["string", "str", "object"]:
+                    param = param[0]
+                else:
+                    param = float(param[0])
             else:
                 param = None
 
@@ -1024,3 +1035,70 @@ class PreProcessor(BaseEstimator, TransformerMixin):
         else:
             print(f"[error] KeyError. {key} not found.")
             return Identity()
+
+    def __cast_columns(self, X):
+
+        for column in self.feature_types:
+
+            type_ = self.feature_types[column]
+
+            if "int" in type_.lower():
+                X[column] = X[column].round(0).astype(type_)
+
+            else:
+                X[column] = X[column].astype(type_)
+
+        return X
+
+
+class EncoderIV(BaseEstimator, TransformerMixin):
+    def __init__(self, column, step=0.1):
+        self.column = column
+        self.step = step
+        self.iv_table = None
+        self.iv_replaces = None
+
+    def fit(self, X, y):
+        self.iv_table = eval_iv_continuous(X[self.column], y, step=self.step)
+        self.iv_replaces = self.iv_table.groupby("feature")["iv"].sum().to_dict()
+        return self
+
+    def transform(self, X, y=None):
+        X = self.__replace(X)
+        return X
+
+    def fit_transform(self, X: pd.DataFrame, y: pd.Series = None) -> pd.DataFrame:
+        self.fit(X)
+        return self.transform(X)
+
+    def __replace(self, X):
+        X[self.column] = X[self.column].apply(
+            lambda x: self.iv_replaces[x] if x in self.iv_replaces else 0
+        )
+        return X
+
+
+def eval_iv_continuous(column, target, step):
+
+    list_ = []
+    for p in np.arange(0, 1, step):
+        p_start = p
+        p_end = p + step
+        temp = eval_information_value(
+            column,
+            (target.between(*target.quantile([p_start, p_end]))).astype(int),
+            goods=0,
+        )
+        temp = temp[~np.isinf(temp["iv"])]
+        list_.append(
+            temp.sort_values("woe")
+            .reset_index()
+            .assign(p_min=p_start)
+            .assign(p_max=p_end)
+            .assign(v_min=target.quantile(p_start))
+            .assign(v_max=target.quantile(p_end))
+        )
+
+    df = pd.concat(list_).sort_values("feature")
+
+    return df
