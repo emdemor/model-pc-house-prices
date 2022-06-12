@@ -12,9 +12,9 @@ from sqlalchemy import create_engine
 from basix.parquet import write as to_parquet
 
 
-def extract_dataset(config: dict, download_bases: bool = False):
+def extract_dataset(config: dict) -> None:
 
-    if download_bases:
+    try:
         logging.info("Download basic features")
         extract_scrapped_relational_data(config)
 
@@ -24,9 +24,22 @@ def extract_dataset(config: dict, download_bases: bool = False):
         logging.info("Download descriptions")
         extract_scrapped_description_data(config)
 
-    data = pd.read_parquet(config["data_raw_basic_path"])
+    except Exception as err:
+        logging.error(err)
+        raise Exception
 
-    assert data is not None
+
+def treat_training_dataset(config: dict):
+
+    data_basic = pd.read_parquet(config["data_raw_basic_path"])
+    assert data_basic is not None
+
+    # TODO
+    # Inserir aqui os dados construidos a partir de
+    # 1. Amenities
+    # 2. Description
+    # 3. Points of Interest
+    data = data_basic
 
     return data
 
