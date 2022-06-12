@@ -25,6 +25,7 @@ def make_dataset(config: dict, download_bases: bool = False):
         data_extraction_description(config)
 
     data = pd.read_parquet(config["data_raw_basic_path"])
+
     assert data is not None
 
     return data

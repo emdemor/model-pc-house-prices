@@ -15,21 +15,21 @@
 #   weight: 1
 
 - name: n_parking_spaces
-  type: int
+  type: float
   imputation_strategy: constant:0
   limits: [0, 7]
   discretizer: uniform:6
   scaler: min_max
 
 - name: n_bathrooms
-  type: int
+  type: float
   imputation_strategy: constant:0
   limits: [0, 7]
   discretizer: uniform:6
   scaler: min_max
 
 - name: n_bedrooms
-  type: int
+  type: float
   imputation_strategy: constant:0
   limits: [0, 8]
   discretizer: uniform:7
@@ -43,7 +43,7 @@
   discretizer: kmeans:10
 
 - name: n_suites
-  type: int
+  type: float
   limits: [0, 4]
   imputation_strategy: constant:0
 
@@ -58,16 +58,41 @@
   limits: [-46.7, -46.4]
 
 - name: type_APARTMENT
-  type: int
+  type: float
 
 - name: type_HOME
-  type: int
+  type: float
 
 - name: type_ALLOTMENT_LAND
-  type: int
+  type: float
 
 - name: type_COUNTRY
-  type: int
+  type: float
 
 - name: neighborhood
   type: string
+  imputation_strategy: constant:outros
+
+- name: time_delta
+  type: float
+
+- name: year
+  type: float
+
+- name: month
+  type: float
+
+- name: day
+  type: float
+
+- name: dist_manh
+  type: float
+  imputation_strategy: mean
+
+- name: dist_square
+  type: float
+  imputation_strategy: mean
+
+- name: dist
+  type: float
+  imputation_strategy: mean

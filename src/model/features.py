@@ -7,6 +7,7 @@ from src.config import get_config
 import unidecode
 from src.base.commons import to_snake_case
 
+
 TARGET_COLUMN = "price"
 
 TARGET_SCALE = "log10"  # 'log', 'log10', 'log1p', 'log101p
@@ -54,9 +55,14 @@ def build_features(data: pd.DataFrame) -> tuple:
 
     data = construct_features(data)
 
+    data = build_date_features(data)
+
     X = data.drop(columns=TARGET_COLUMN, errors="ignore")
 
-    y = transform_target(data[TARGET_COLUMN])
+    if TARGET_COLUMN in data.columns:
+        y = transform_target(data[TARGET_COLUMN])
+    else:
+        y = None
 
     return X, y
 
@@ -72,13 +78,15 @@ def transform_target(y: pd.Series) -> pd.Series:
 
 def clear_dataset(data: pd.DataFrame) -> pd.DataFrame:
 
-    # remove registers where response variable is null
-    clean_data = data.loc[data[TARGET_COLUMN].notna()]
+    if TARGET_COLUMN in data.columns:
 
-    # remove registers where response variable is zero
-    clean_data = data.loc[data[TARGET_COLUMN] > 0]
+        # remove registers where response variable is null
+        data = data.loc[data[TARGET_COLUMN].notna()]
 
-    return clean_data
+        # remove registers where response variable is zero
+        data = data.loc[data[TARGET_COLUMN] > 0]
+
+    return data
 
 
 def dataset_treatment(data: pd.DataFrame) -> pd.DataFrame:
@@ -109,7 +117,7 @@ def generate_dummy_variables(
             column_name = cat
 
         dataframe = dataframe.assign(
-            **{column_name: (dataframe[column] == cat).astype("Int8")}
+            **{column_name: (dataframe[column] == cat).astype(float)}
         )
 
     return dataframe
@@ -152,6 +160,8 @@ def treat_type(data: pd.DataFrame) -> pd.DataFrame:
 
 def treat_latlong(data: pd.DataFrame) -> pd.DataFrame:
 
+    center_coords = np.array([-46.567079, -21.790012])
+
     # -- Removendo as latitudes e longitudes zeradas ---------
     data.loc[data["longitude"] > -10, "longitude"] = np.nan
     data.loc[data["latitude"] > -10, "latitude"] = np.nan
@@ -161,16 +171,28 @@ def treat_latlong(data: pd.DataFrame) -> pd.DataFrame:
         "longitude"
     ].between(*LAT_INTERVAL)
 
-    values = data.loc[conditions_lat_long_inverted][["latitude", "longitude"]].to_dict(
-        orient="records"
-    )[0]
+    if conditions_lat_long_inverted.sum() > 0:
+        values = data.loc[conditions_lat_long_inverted][
+            ["latitude", "longitude"]
+        ].to_dict(orient="records")[0]
 
-    data.loc[conditions_lat_long_inverted, "latitude"] = values["longitude"]
-    data.loc[conditions_lat_long_inverted, "longitude"] = values["latitude"]
+        data.loc[conditions_lat_long_inverted, "latitude"] = values["longitude"]
+        data.loc[conditions_lat_long_inverted, "longitude"] = values["latitude"]
 
     # -- Anulando as latitudes e longitudes fora do intervalo -----
     data.loc[~data["latitude"].between(*LAT_INTERVAL), "latitude"] = np.nan
     data.loc[~data["longitude"].between(*LONG_INTERVAL), "longitude"] = np.nan
+
+    # -- distancia do centro ----------------------------
+    data["dist_manh"] = np.abs(data["longitude"] - center_coords[0]) + np.abs(
+        data["latitude"] - center_coords[1]
+    )
+
+    data["dist_square"] = np.square(data["longitude"] - center_coords[0]) + np.square(
+        data["latitude"] - center_coords[1]
+    )
+
+    data["dist"] = np.sqrt(data["dist_square"])
 
     return data
 
@@ -187,6 +209,8 @@ def treat_neighborhood(data: pd.DataFrame) -> pd.DataFrame:
     except:
         maps = {}
 
+    data["neighborhood"] = data["neighborhood"].str.strip()
+
     data["neighborhood"] = data["neighborhood"].replace(maps)
 
     data["neighborhood"] = data["neighborhood"].apply(decode)
@@ -196,5 +220,29 @@ def treat_neighborhood(data: pd.DataFrame) -> pd.DataFrame:
     )
 
     data.loc[data["neighborhood"] == "", "neighborhood"] = None
+
+    data.loc[
+        data["neighborhood"].fillna("").str.contains("chacara"), "neighborhood"
+    ] = "zona_rural"
+
+    # data = pd.concat(
+    #     [
+    #         data.drop(columns="neighborhood"),
+    #         pd.get_dummies(data["neighborhood"], prefix="neighbor"),
+    #     ],
+    #     axis=1,
+    # )
+
+    return data
+
+
+def build_date_features(data: pd.DataFrame) -> pd.DataFrame:
+    data["search_date"] = list(data["search_date"])
+    data["time_delta"] = (
+        pd.to_datetime(data["search_date"]) - pd.to_datetime("2021-01-01")
+    ).dt.days
+    data["year"] = pd.to_datetime(data["search_date"]).dt.year
+    data["month"] = pd.to_datetime(data["search_date"]).dt.month
+    data["day"] = pd.to_datetime(data["search_date"]).dt.day
 
     return data
