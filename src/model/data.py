@@ -380,3 +380,13 @@ def add_neighbor_region(data: pd.DataFrame, config: dict) -> pd.DataFrame:
     data = data.merge(df_neighbor, on="neighborhood", how="left")
 
     return data
+
+
+def add_region_population(data: pd.DataFrame, config: dict) -> pd.DataFrame:
+
+    # Import neighbor region information
+    df_neighbor = pd.read_csv(config["data_external_neighbor_path"])
+    df_neighbor = df_neighbor.loc[~df_neighbor["neighborhood"].duplicated()]
+    data = data.merge(df_neighbor, on="neighborhood", how="left")
+
+    return data
