@@ -12,9 +12,12 @@ from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from basix.parquet import write as to_parquet
 
+import unidecode
+
 
 PARAMETERS_CONFIG = get_config(filename="config/parameters.yaml")
 TARGET_TRANSFORMATIONS = {
+    "identity": lambda x: x,
     "log": np.log,
     "log10": np.log10,
     "log1p": np.log1p,
@@ -22,20 +25,21 @@ TARGET_TRANSFORMATIONS = {
 }
 
 
-def make_dataset(config: dict, extract_data: bool = False) -> pd.DataFrame:
+def get_train_dataset(config: dict, extract_data: bool = False) -> pd.DataFrame:
     if extract_data:
         extract_dataset(config)
 
     data_basic = pd.read_parquet(config["data_raw_basic_path"])
+    data_basic = sanitize_features(data_basic)
 
     # TODO
     # Inserir aqui os dados construidos a partir de
     # 1. Amenities
     # 2. Description
     # 3. Points of Interest
-    data = data_basic
+    data = data_basic  # .merge(df_neighbor, on="neighborhood", how="left")
 
-    # Remover os registros onde a variável responsta
+    # Remover os registros onde a variável resposta
     # é nula (ou zero, no caso de preço)
     data = remove_invalid_registers(data)
 
@@ -269,3 +273,110 @@ def extract_scrapped_description_data(config: dict):
         overwrite=True,
         partition_cols=["search_date"],
     )
+
+
+def sanitize_features(data: pd.DataFrame) -> pd.DataFrame:
+
+    data = treat_type(data)
+
+    data = treat_latlong(data)
+
+    data = treat_neighborhood(data)
+
+    return data
+
+
+def treat_type(data: pd.DataFrame) -> pd.DataFrame:
+
+    # -- Terrenos não tem certas propriedades ----------
+    data.loc[
+        data["type"].str.contains("ALLOTMENT"),
+        ["n_parking_spaces", "n_bathrooms", "n_bedrooms"],
+    ] = np.nan
+
+    # -- Unificando tipos comuns -----
+    data["type"] = data["type"].replace(PARAMETERS_CONFIG["TYPE_MAPPING"])
+
+    # -- Anulando os casos onde a área é zero ------------
+    data.loc[
+        (data["type"].isin(["ALLOTMENT_LAND", "COUNTRY", "BUSINESS"]))
+        & (data["area"] == 0),
+        ["area"],
+    ] = np.nan
+
+    return data
+
+
+def treat_latlong(data: pd.DataFrame) -> pd.DataFrame:
+
+    # -- Removendo as latitudes e longitudes zeradas ---------
+    data.loc[data["longitude"] > -10, "longitude"] = np.nan
+    data.loc[data["latitude"] > -10, "latitude"] = np.nan
+
+    # -- tratando os casos onde latitude e longitude estão invertidas
+    conditions_lat_long_inverted = data["latitude"].between(
+        *PARAMETERS_CONFIG["LONG_INTERVAL"]
+    ) & data["longitude"].between(*PARAMETERS_CONFIG["LAT_INTERVAL"])
+
+    if conditions_lat_long_inverted.sum() > 0:
+        values = data.loc[conditions_lat_long_inverted][
+            ["latitude", "longitude"]
+        ].to_dict(orient="records")[0]
+
+        data.loc[conditions_lat_long_inverted, "latitude"] = values["longitude"]
+        data.loc[conditions_lat_long_inverted, "longitude"] = values["latitude"]
+
+    # -- Anulando as latitudes e longitudes fora do intervalo -----
+    data.loc[
+        ~data["latitude"].between(*PARAMETERS_CONFIG["LAT_INTERVAL"]), "latitude"
+    ] = np.nan
+    data.loc[
+        ~data["longitude"].between(*PARAMETERS_CONFIG["LONG_INTERVAL"]), "longitude"
+    ] = np.nan
+
+    return data
+
+
+def treat_neighborhood(data: pd.DataFrame) -> pd.DataFrame:
+    def decode(x):
+        try:
+            return unidecode.unidecode(x)
+        except:
+            return x
+
+    try:
+        maps = get_config(filename="config/neighbor_rename.yaml")
+    except:
+        maps = {}
+
+    data["neighborhood"] = data["neighborhood"].str.strip()
+
+    data["neighborhood"] = data["neighborhood"].replace(maps)
+
+    data["neighborhood"] = data["neighborhood"].apply(decode)
+
+    def convert_to_snake_case(x):
+        try:
+            return to_snake_case(x)
+        except:
+            return x
+
+    data["neighborhood"] = data["neighborhood"].apply(convert_to_snake_case)
+
+    data.loc[data["neighborhood"] == "", "neighborhood"] = None
+
+    data.loc[
+        data["neighborhood"].fillna("").str.contains("chacara"), "neighborhood"
+    ] = "zona_rural"
+
+    return data
+
+
+def add_neighbor_region(data: pd.DataFrame, config: dict) -> pd.DataFrame:
+
+    # Import neighbor region information
+    df_neighbor = pd.read_csv(config["data_external_neighbor_path"])
+    df_neighbor = df_neighbor.loc[~df_neighbor["neighborhood"].duplicated()]
+    data = data.merge(df_neighbor, on="neighborhood", how="left")
+
+    return data
