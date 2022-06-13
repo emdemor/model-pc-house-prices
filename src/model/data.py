@@ -41,7 +41,7 @@ def get_train_dataset(config: dict, extract_data: bool = False) -> pd.DataFrame:
 
     # Remover os registros onde a variável resposta
     # é nula (ou zero, no caso de preço)
-    data = remove_invalid_registers(data)
+    data = drop_rows(data)
 
     X = data.drop(columns=[PARAMETERS_CONFIG["TARGET_COLUMN"]], errors="ignore")
 
@@ -79,7 +79,7 @@ def extract_dataset(config: dict) -> None:
         raise Exception
 
 
-def remove_invalid_registers(data: pd.DataFrame) -> pd.DataFrame:
+def drop_rows(data: pd.DataFrame) -> pd.DataFrame:
 
     if PARAMETERS_CONFIG["TARGET_COLUMN"] in data.columns:
 
@@ -90,7 +90,10 @@ def remove_invalid_registers(data: pd.DataFrame) -> pd.DataFrame:
         data = data.loc[data[PARAMETERS_CONFIG["TARGET_COLUMN"]] > 0]
 
     # -- Imóveis do tipo Hoteis são muito peculiares --------
-    data = data.loc[data["type"] != "HOTEL"].copy()
+
+    derired_types = ["HOME", "APARTMENT"]  # 'BUSINESS' 'ALLOTMENT_LAND' 'COUNTRY'
+
+    data = data.loc[data["type"].isin(derired_types)].copy()
 
     return data
 
