@@ -41,21 +41,25 @@
   imputation_strategy: constant:1.90
   limits: [1.3, 4]
   discretizer: kmeans:10
+  scaler: min_max
 
 - name: n_suites
   type: float
   limits: [0, 4]
   imputation_strategy: constant:0
+  scaler: min_max
 
 - name: latitude
   type: float
   imputation_strategy: constant:-21.797
   limits: [-21.9, -21.7]
+  scaler: min_max
 
 - name: longitude
   type: float
   imputation_strategy: constant:-46.57
   limits: [-46.7, -46.4]
+  scaler: min_max
 
 - name: type_APARTMENT
   type: float
@@ -75,24 +79,96 @@
 
 - name: time_delta
   type: float
+  scaler: min_max
 
 - name: year
   type: float
+  scaler: min_max
 
 - name: month
   type: float
+  scaler: min_max
 
 - name: day
   type: float
+  scaler: min_max
 
 - name: dist_manh
   type: float
   imputation_strategy: mean
+  scaler: min_max
 
 - name: dist_square
   type: float
   imputation_strategy: mean
+  scaler: min_max
 
 - name: dist
   type: float
   imputation_strategy: mean
+  scaler: min_max
+
+- name: pop_2000
+  type: float
+  imputation_strategy: mean
+  scaler: min_max
+
+- name: pop_2010
+  type: float
+  imputation_strategy: mean
+  scaler: min_max
+
+- name: pop_2022_proj
+  type: float
+  imputation_strategy: mean
+  scaler: min_max
+
+- name: "pct_domicilios_por_sal_min_0"
+  type: float
+  imputation_strategy: mean
+  scaler: min_max
+
+- name: "pct_domicilios_por_sal_min_0_0.5"
+  type: float
+  imputation_strategy: mean
+  scaler: min_max
+
+- name: "pct_domicilios_por_sal_min_0.5_1"
+  type: float
+  imputation_strategy: mean
+  scaler: min_max
+
+- name: "pct_domicilios_por_sal_min_1_2"
+  type: float
+  imputation_strategy: mean
+  scaler: min_max
+
+- name: "pct_domicilios_por_sal_min_2_5"
+  type: float
+  imputation_strategy: mean
+  scaler: min_max
+
+- name: "pct_domicilios_por_sal_min_5_10"
+  type: float
+  imputation_strategy: mean
+  scaler: min_max
+
+- name: "pct_domicilios_por_sal_min_10_20"
+  type: float
+  imputation_strategy: mean
+  scaler: min_max
+
+- name: "pct_domicilios_por_sal_min_20_inf"
+  type: float
+  imputation_strategy: mean
+  scaler: min_max
+
+- name: "neighbor_avg_income"
+  type: float
+  imputation_strategy: mean
+  scaler: min_max
+
+- name: "taxa_alfabetizacao_bairro"
+  type: float
+  imputation_strategy: mean
+  scaler: min_max
