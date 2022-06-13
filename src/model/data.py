@@ -385,8 +385,49 @@ def add_neighbor_region(data: pd.DataFrame, config: dict) -> pd.DataFrame:
 def add_region_population(data: pd.DataFrame, config: dict) -> pd.DataFrame:
 
     # Import neighbor region information
-    df_neighbor = pd.read_csv(config["data_external_neighbor_path"])
-    df_neighbor = df_neighbor.loc[~df_neighbor["neighborhood"].duplicated()]
-    data = data.merge(df_neighbor, on="neighborhood", how="left")
+    df_pop = pd.read_csv(config["data_external_region_pop_path"])
+    df_pop = df_pop.loc[~df_pop["neighbor_region"].duplicated()]
+    data = data.merge(df_pop, on="neighbor_region", how="left")
+
+    return data
+
+
+def add_min_income_pct(data: pd.DataFrame, config: dict) -> pd.DataFrame:
+
+    # Import neighbor region information
+    df_minc = pd.read_csv(config["data_external_region_min_income_pct_path"])
+    df_minc = df_minc.loc[~df_minc["neighbor_region"].duplicated()]
+    data = data.merge(df_minc, on="neighbor_region", how="left")
+
+    return data
+
+
+def add_avg_income(data: pd.DataFrame, config: dict) -> pd.DataFrame:
+
+    # Import neighbor region information
+    df_inc = pd.read_csv(config["data_external_region_avg_income_path"])
+    df_inc = df_inc.loc[~df_inc["neighbor_region"].duplicated()]
+    data = data.merge(df_inc, on="neighbor_region", how="left")
+
+    return data
+
+
+def add_literacy_rate(data: pd.DataFrame, config: dict) -> pd.DataFrame:
+
+    # Import neighbor region information
+    df_lit = pd.read_csv(config["data_external_region_literacy_path"])
+    df_lit = df_lit.loc[~df_lit["neighbor_region"].duplicated()]
+    data = data.merge(df_lit, on="neighbor_region", how="left")
+
+    return data
+
+
+def add_external_data(data: pd.DataFrame, config: dict) -> pd.DataFrame:
+
+    data = add_neighbor_region(data, config)
+    data = add_region_population(data, config)
+    data = add_min_income_pct(data, config)
+    data = add_avg_income(data, config)
+    data = add_literacy_rate(data, config)
 
     return data
