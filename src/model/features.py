@@ -114,3 +114,21 @@ def fill_latlong_by_neighbor(data: pd.DataFrame) -> pd.DataFrame:
         logging.warning(err)
 
     return data
+
+
+def neighbors_one_hot_encode(X: pd.DataFrame, prefix="neighbor_") -> pd.DataFrame:
+
+    selected_neihbors = get_config("model/onehot_encode_neighborhood.yaml")
+
+    list_ = [
+        np.where(X["neighborhood"].fillna("") == neighbor, 1, 0)
+        for neighbor in selected_neihbors
+    ]
+
+    ohe = pd.DataFrame(
+        np.array(list_).T,
+        columns=[prefix + str(neighbor) for neighbor in selected_neihbors],
+        index=X.index,
+    )
+
+    return pd.concat([X.drop(columns=["neighborhood"]), ohe], axis=1)
