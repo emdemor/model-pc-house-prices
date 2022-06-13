@@ -1,4 +1,4 @@
-regiao,%_domicilios_por_sal_min_0,"%_domicilios_por_sal_min_[0,0.5]","%_domicilios_por_sal_min_(0.5,1]","%_domicilios_por_sal_min_(1,2]","%_domicilios_por_sal_min_(2,5]","%_domicilios_por_sal_min_(5,10]","%_domicilios_por_sal_min_(10,20]","%_domicilios_por_sal_min_(20,inf)"
+neighbor_region,pct_domicilios_por_sal_min_0,pct_domicilios_por_sal_min_0_0.5,pct_domicilios_por_sal_min_0.5_1,pct_domicilios_por_sal_min_1_2,pct_domicilios_por_sal_min_2_5,pct_domicilios_por_sal_min_5_10,pct_domicilios_por_sal_min_10_20,pct_domicilios_por_sal_min_20_inf
 Região Urbana Homogênea I,0.0,0.08156028368794327,0.14893617021276595,0.33687943262411346,0.19148936170212766,0.1276595744680851,0.1099290780141844,0.0035460992907801418
 Região Urbana Homogênea II,0.004464285714285714,0.07589285714285714,0.19196428571428573,0.42410714285714285,0.20089285714285715,0.07142857142857142,0.017857142857142856,0.013392857142857142
 Região Urbana Homogênea III,0.0027416038382453737,0.06305688827964359,0.16004112405757367,0.4273474982864976,0.2299520219328307,0.06271418779986292,0.017477724468814255,0.03666895133653187
