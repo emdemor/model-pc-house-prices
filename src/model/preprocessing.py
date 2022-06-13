@@ -17,7 +17,7 @@ from sklearn.preprocessing import (
 from sklearn import compose
 from sklearn.pipeline import Pipeline
 
-from xtlearn.metrics import eval_information_value
+# from xtlearn.metrics import eval_information_value
 
 # from IPython.display import display
 
@@ -1078,27 +1078,27 @@ class EncoderIV(BaseEstimator, TransformerMixin):
         return X
 
 
-def eval_iv_continuous(column, target, step):
+# def eval_iv_continuous(column, target, step):
 
-    list_ = []
-    for p in np.arange(0, 1, step):
-        p_start = p
-        p_end = p + step
-        temp = eval_information_value(
-            column,
-            (target.between(*target.quantile([p_start, p_end]))).astype(int),
-            goods=0,
-        )
-        temp = temp[~np.isinf(temp["iv"])]
-        list_.append(
-            temp.sort_values("woe")
-            .reset_index()
-            .assign(p_min=p_start)
-            .assign(p_max=p_end)
-            .assign(v_min=target.quantile(p_start))
-            .assign(v_max=target.quantile(p_end))
-        )
+#     list_ = []
+#     for p in np.arange(0, 1, step):
+#         p_start = p
+#         p_end = p + step
+#         temp = eval_information_value(
+#             column,
+#             (target.between(*target.quantile([p_start, p_end]))).astype(int),
+#             goods=0,
+#         )
+#         temp = temp[~np.isinf(temp["iv"])]
+#         list_.append(
+#             temp.sort_values("woe")
+#             .reset_index()
+#             .assign(p_min=p_start)
+#             .assign(p_max=p_end)
+#             .assign(v_min=target.quantile(p_start))
+#             .assign(v_max=target.quantile(p_end))
+#         )
 
-    df = pd.concat(list_).sort_values("feature")
+#     df = pd.concat(list_).sort_values("feature")
 
-    return df
+#     return df
