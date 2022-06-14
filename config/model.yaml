@@ -1,0 +1,5 @@
+model: xgboost
+static_parameters:
+  eval_metric: rmse
+  random_state: 42
+nfolds: 5
