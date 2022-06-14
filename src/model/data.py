@@ -91,7 +91,7 @@ def drop_rows(data: pd.DataFrame) -> pd.DataFrame:
 
     # -- Imóveis do tipo Hoteis são muito peculiares --------
 
-    derired_types = ["HOME", "APARTMENT"]  # 'BUSINESS' 'ALLOTMENT_LAND' 'COUNTRY'
+    derired_types = ["HOME"]  # "APARTMENT" 'BUSINESS' 'ALLOTMENT_LAND' 'COUNTRY'
 
     data = data.loc[data["type"].isin(derired_types)].copy()
 
