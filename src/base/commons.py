@@ -1,7 +1,8 @@
 import re
 import git
 import pandas as pd
-
+import json
+import yaml
 from sklearn.base import TransformerMixin
 
 
@@ -96,3 +97,31 @@ def dataframe_transformer(
         )
 
     return result
+
+
+def dump_json(obj, filepath, *args, **kwargs):
+
+    with open(filepath, "w") as file:
+        json.dump(obj, file, *args, **kwargs)
+
+
+def load_json(filepath, *args, **kwargs):
+
+    with open(filepath, "r") as file:
+        data = json.load(file, *args, **kwargs)
+
+    return data
+
+
+def dump_yaml(obj, filepath, *args, **kwargs):
+
+    with open(filepath, "w") as file:
+        yaml.dump(obj, file, *args, **kwargs)
+
+
+def load_yaml(filename, *args, **kwargs):
+
+    with open(filename, "r") as file:
+        data = yaml.safe_load(file, *args, **kwargs)
+
+    return data
