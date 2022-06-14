@@ -118,7 +118,9 @@ def fill_latlong_by_neighbor(data: pd.DataFrame) -> pd.DataFrame:
 
 def neighbors_one_hot_encode(X: pd.DataFrame, prefix="neighbor_") -> pd.DataFrame:
 
-    selected_neihbors = get_config("model/onehot_encode_neighborhood.yaml")
+    selected_neihbors = get_config(
+        "model/preprocessing/onehot_encode_neighborhood.yaml"
+    )
 
     list_ = [
         np.where(X["neighborhood"].fillna("") == neighbor, 1, 0)
