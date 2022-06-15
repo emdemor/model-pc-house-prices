@@ -61,10 +61,12 @@ def gaussian_process_optimization(X_train, y_train, model_config):
 
     model_config["fit_parameters"]["eval_set"] = None
 
-    for i, param in enumerate(model_config["parametric_space"]):
-        param.update({"optimal_value": res_gp.x[i]})
+    # for i, param in enumerate(model_config["parametric_space"]):
+    #     param.update({"optimal_value": res_gp.x[i]})
 
-    return {
-        "best_parameters": dict(zip(hyper_param.keys(), res_gp.x)),
-        "best_score": res_gp.fun,
-    }
+    # return {
+    #     "best_parameters": dict(zip(hyper_param.keys(), res_gp.x)),
+    #     "best_score": res_gp.fun,
+    # }
+
+    return res_gp
