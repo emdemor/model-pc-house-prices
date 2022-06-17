@@ -1,0 +1,57 @@
+fit_parameters:
+  eval_set: null
+  verbose: 0
+model: xgboost
+opt_config:
+  n_calls: 2
+  n_folds: 2
+  n_random_starts: 1
+  random_state: 42
+  verbose: 1
+parametric_space:
+- estimate: 0.2278894004906563
+  parameter: learning_rate
+  range:
+  - 0.05
+  - 1.13
+  step: 0.01
+  type: real
+- estimate: 92
+  parameter: n_estimators
+  range:
+  - 80
+  - 120
+  step: 1
+  type: integer
+- estimate: 16
+  parameter: max_depth
+  range:
+  - 13
+  - 19
+  step: 1
+  type: integer
+- categories:
+  - auto
+  - approx
+  - hist
+  estimate: auto
+  parameter: tree_method
+  type: categorical
+- estimate: 0.99
+  parameter: subsample
+  range:
+  - 0.5
+  - 1.0
+  step: 1
+  type: real
+- estimate: 0.99
+  parameter: colsample_bytree
+  range:
+  - 0.5
+  - 1.0
+  step: 1
+  type: real
+static_parameters:
+  early_stopping_rounds: 200
+  eval_metric: rmse
+  random_state: 42

@@ -1,29 +1,19 @@
-from xgboost import XGBRegressor
-from src.base.commons import load_yaml
-from src.optmizer.space import eval_parametric_space_dimension
+from src.base.commons import load_json, load_yaml
+from src.model.regressor import set_regressor
+from src.optimizer.space import eval_parametric_space_dimension
 from skopt import gp_minimize
 from skopt.utils import use_named_args
-from src.optmizer.cross_validation import cross_validate_score
+from src.optimizer.cross_validation import cross_validate_score
 from sklearn.metrics import r2_score, mean_absolute_error
 
 
-def set_regressor(model, **regressor_args):
+def gaussian_process_optimization(X_train, y_train):
 
-    model_config = load_yaml(f"config/model.yaml")
-
-    static_parameters = model_config["static_parameters"]
-
-    model = model_config["model"]
-
-    if model == "xgboost":
-        model = XGBRegressor(**static_parameters, **regressor_args)
-        return model
-
-
-def gaussian_process_optimization(X_train, y_train, model_config):
+    model_config = load_yaml("config/model.yaml")
+    model_parameters = load_json(f"model/{model_config['model']}/config.json")
 
     hyper_param = {
-        hp["parameter"]: hp["estimate"] for hp in model_config["parametric_space"]
+        hp["parameter"]: hp["best_value"] for hp in model_parameters["parametric_space"]
     }
 
     space = [
@@ -45,6 +35,11 @@ def gaussian_process_optimization(X_train, y_train, model_config):
             n_folds=model_config["opt_config"]["n_folds"],
             fit_params=model_config["fit_parameters"],
         )
+
+        print(f"\n\n{80 * '#'}")
+        print("params:", list(params.values()))
+        print("mae:", cv_mae)
+        print(f"{50 * '-'}")
 
         return cv_mae
 
