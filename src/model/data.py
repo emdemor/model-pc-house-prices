@@ -434,3 +434,20 @@ def add_external_data(data: pd.DataFrame, config: dict) -> pd.DataFrame:
     data = add_literacy_rate(data, config)
 
     return data
+
+
+def export_train_test_datasets(
+    X_train: pd.DataFrame,
+    X_test: pd.DataFrame,
+    y_train: pd.Series,
+    y_test: pd.Series,
+) -> None:
+
+    data_config = get_config(filename="config/filepaths.yaml")
+
+    # Persisting tables
+    X_train.to_csv(data_config["data_train_features_path"], index=False)
+    y_train.to_csv(data_config["data_train_target_path"], index=False)
+
+    X_test.to_csv(data_config["data_test_features_path"], index=False)
+    y_test.to_csv(data_config["data_test_target_path"], index=False)
