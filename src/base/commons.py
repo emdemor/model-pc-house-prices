@@ -1,9 +1,22 @@
 import re
 import git
 import pandas as pd
+import numpy as np
 import json
 import yaml
+import dill as pickle
 from sklearn.base import TransformerMixin
+
+
+class NpEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        if isinstance(obj, np.floating):
+            return float(obj)
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return super(NpEncoder, self).default(obj)
 
 
 def get_last_git_tag() -> str:
@@ -102,7 +115,7 @@ def dataframe_transformer(
 def dump_json(obj, filepath, *args, **kwargs):
 
     with open(filepath, "w") as file:
-        json.dump(obj, file, *args, **kwargs)
+        json.dump(obj, file, cls=NpEncoder, *args, **kwargs)
 
 
 def load_json(filepath, *args, **kwargs):
@@ -123,5 +136,19 @@ def load_yaml(filename, *args, **kwargs):
 
     with open(filename, "r") as file:
         data = yaml.safe_load(file, *args, **kwargs)
+
+    return data
+
+
+def dump_pickle(obj, filepath, *args, **kwargs):
+
+    with open(filepath, "wb") as file:
+        pickle.dump(obj, file, *args, **kwargs)
+
+
+def load_pickle(filename, *args, **kwargs):
+
+    with open(filename, "rb") as file:
+        data = pickle.load(file, *args, **kwargs)
 
     return data
