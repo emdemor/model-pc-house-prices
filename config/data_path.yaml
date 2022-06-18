@@ -1,9 +1,0 @@
-data_raw_basic_path: data/raw/basic/
-data_raw_amenities_path: data/raw/amenities/
-data_raw_poi_path: data/raw/poi/
-data_raw_descriptions_path: data/raw/descriptions/
-data_external_neighbor_path: data/external/neighbor_regions_pc.csv
-data_external_region_pop_path: data/external/ibge_populacao_bairro.csv
-data_external_region_min_income_pct_path: data/external/ibge_porc_domicilio_salario_min.csv
-data_external_region_avg_income_path: data/external/ibge_renda_media.csv
-data_external_region_literacy_path: data/external/ibge_taxa_alfabetizacao_bairro.csv

@@ -1,0 +1,70 @@
+model: xgboost
+
+metric:
+  name: mae
+  value: 29644.70
+  greater_is_better: False
+
+static_parameters:
+  eval_metric: rmse
+  early_stopping_rounds: 200
+  random_state: 42
+
+fit_parameters:
+  verbose: 0
+
+opt_config:
+  n_folds: 2
+  n_calls: 2
+  n_random_starts: 1
+  verbose: 1
+  random_state: 42
+
+parametric_space:
+  - parameter: learning_rate
+    estimate: 0.2278894004906563
+    range:
+      - 0.05
+      - 1.13
+    step: 0.01
+    type: real
+
+  - parameter: n_estimators
+    estimate: 92
+    range:
+      - 80
+      - 120
+    step: 1
+    type: integer
+
+  - parameter: max_depth
+    estimate: 16
+    range:
+      - 13
+      - 19
+    step: 1
+    type: integer
+
+  - parameter: tree_method
+    categories:
+      - auto
+      - approx
+      - hist
+    estimate: auto
+    type: categorical
+
+  - parameter: subsample
+    estimate: 0.99
+    range:
+      - 0.5
+      - 1.0
+    step: 1
+    type: real
+
+  - parameter: colsample_bytree
+    estimate: 0.99
+    range:
+      - 0.5
+      - 1.0
+    step: 1
+    type: real
