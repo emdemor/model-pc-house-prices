@@ -8,14 +8,14 @@ metric:
 static_parameters:
   eval_metric: rmse
   early_stopping_rounds: 200
-  random_state: 42
+  random_state: null
 
 fit_parameters:
   verbose: 0
 
 opt_config:
   n_folds: 5
-  n_calls: 5
+  n_calls: 15
   n_random_starts: 1
   verbose: 1
   random_state: 42
