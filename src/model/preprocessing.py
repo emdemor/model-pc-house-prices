@@ -5,7 +5,7 @@ import pandas as pd
 import logging
 import typing
 from src.config import *
-from src.base.commons import dataframe_transformer
+from src.base.commons import dataframe_transformer, load_pickle
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import (
@@ -17,9 +17,8 @@ from sklearn.preprocessing import (
 from sklearn import compose
 from sklearn.pipeline import Pipeline
 
-# from xtlearn.metrics import eval_information_value
-
-# from IPython.display import display
+from src.model.data import add_external_data, sanitize_features
+from src.model.features import build_features, neighbors_one_hot_encode
 
 
 class Identity(BaseEstimator, TransformerMixin):
@@ -1051,54 +1050,32 @@ class PreProcessor(BaseEstimator, TransformerMixin):
         return X
 
 
-class EncoderIV(BaseEstimator, TransformerMixin):
-    def __init__(self, column, step=0.1):
-        self.column = column
-        self.step = step
-        self.iv_table = None
-        self.iv_replaces = None
+def apply_preprocess(preprocessor: PreProcessor, X: pd.DataFrame):
 
-    def fit(self, X, y):
-        self.iv_table = eval_iv_continuous(X[self.column], y, step=self.step)
-        self.iv_replaces = self.iv_table.groupby("feature")["iv"].sum().to_dict()
-        return self
+    X = preprocessor.transform(X)
 
-    def transform(self, X, y=None):
-        X = self.__replace(X)
-        return X
+    X = neighbors_one_hot_encode(X)
 
-    def fit_transform(self, X: pd.DataFrame, y: pd.Series = None) -> pd.DataFrame:
-        self.fit(X)
-        return self.transform(X)
-
-    def __replace(self, X):
-        X[self.column] = X[self.column].apply(
-            lambda x: self.iv_replaces[x] if x in self.iv_replaces else 0
-        )
-        return X
+    return X
 
 
-# def eval_iv_continuous(column, target, step):
+def preprocess_transform(features: dict):
 
-#     list_ = []
-#     for p in np.arange(0, 1, step):
-#         p_start = p
-#         p_end = p + step
-#         temp = eval_information_value(
-#             column,
-#             (target.between(*target.quantile([p_start, p_end]))).astype(int),
-#             goods=0,
-#         )
-#         temp = temp[~np.isinf(temp["iv"])]
-#         list_.append(
-#             temp.sort_values("woe")
-#             .reset_index()
-#             .assign(p_min=p_start)
-#             .assign(p_max=p_end)
-#             .assign(v_min=target.quantile(p_start))
-#             .assign(v_max=target.quantile(p_end))
-#         )
+    data_config = get_config(filename="config/filepaths.yaml")
 
-#     df = pd.concat(list_).sort_values("feature")
+    preprocessor = load_pickle(data_config["model_preprocessor_path"])
 
-#     return df
+    X = pd.DataFrame([features])
+    X = sanitize_features(X)
+    X = add_external_data(X, data_config)
+
+    X = build_features(X)
+    X = apply_preprocess(preprocessor, X)
+
+    return X
+
+
+def get_preprocessor():
+    filepaths = get_config(filename="config/filepaths.yaml")
+    preprocessor = load_pickle(filepaths["model_preprocessor_path"])
+    return preprocessor

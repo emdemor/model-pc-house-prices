@@ -41,7 +41,7 @@ def get_train_dataset(config: dict, extract_data: bool = False) -> pd.DataFrame:
 
     # Remover os registros onde a variável resposta
     # é nula (ou zero, no caso de preço)
-    data = remove_invalid_registers(data)
+    data = drop_rows(data)
 
     X = data.drop(columns=[PARAMETERS_CONFIG["TARGET_COLUMN"]], errors="ignore")
 
@@ -79,7 +79,7 @@ def extract_dataset(config: dict) -> None:
         raise Exception
 
 
-def remove_invalid_registers(data: pd.DataFrame) -> pd.DataFrame:
+def drop_rows(data: pd.DataFrame) -> pd.DataFrame:
 
     if PARAMETERS_CONFIG["TARGET_COLUMN"] in data.columns:
 
@@ -90,7 +90,10 @@ def remove_invalid_registers(data: pd.DataFrame) -> pd.DataFrame:
         data = data.loc[data[PARAMETERS_CONFIG["TARGET_COLUMN"]] > 0]
 
     # -- Imóveis do tipo Hoteis são muito peculiares --------
-    data = data.loc[data["type"] != "HOTEL"].copy()
+
+    derired_types = ["HOME"]  # "APARTMENT" 'BUSINESS' 'ALLOTMENT_LAND' 'COUNTRY'
+
+    data = data.loc[data["type"].isin(derired_types)].copy()
 
     return data
 
@@ -431,3 +434,20 @@ def add_external_data(data: pd.DataFrame, config: dict) -> pd.DataFrame:
     data = add_literacy_rate(data, config)
 
     return data
+
+
+def export_train_test_datasets(
+    X_train: pd.DataFrame,
+    X_test: pd.DataFrame,
+    y_train: pd.Series,
+    y_test: pd.Series,
+) -> None:
+
+    data_config = get_config(filename="config/filepaths.yaml")
+
+    # Persisting tables
+    X_train.to_csv(data_config["data_train_features_path"], index=False)
+    y_train.to_csv(data_config["data_train_target_path"], index=False)
+
+    X_test.to_csv(data_config["data_test_features_path"], index=False)
+    y_test.to_csv(data_config["data_test_target_path"], index=False)
