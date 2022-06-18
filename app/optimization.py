@@ -17,15 +17,12 @@ def optimize_regressor():
     # Importo as configurações do modelo
     model_config = load_yaml("config/model.yaml")
 
-    model_parameters = get_model_parameters()
+    # Importando os parâmetros do modelo
+    model_parameters = load_json(model_config["parametric_space_path"])
 
-    for i, param in enumerate(model_parameters["parametric_space"]):
-        param.update({"best_value": param["estimate"]})
-
-    dump_json(model_parameters, f"model/{model_config['model']}/config.json", indent=4)
-
+    # Montando o dicionário de parâmetros
     hyper_param = {
-        hp["parameter"]: hp["best_value"] for hp in model_parameters["parametric_space"]
+        hp["parameter"]: hp["estimate"] for hp in model_parameters["parametric_space"]
     }
 
     filepaths = load_yaml(filename="config/filepaths.yaml")
@@ -60,13 +57,11 @@ def optimize_regressor():
 
         # atualizar model config
         for i, param in enumerate(model_parameters["parametric_space"]):
-            param.update({"best_value": optimizer.x[i]})
+            param.update({"estimate": optimizer.x[i]})
 
         model_parameters["metric"].update({"value": mae_proposal})
 
-        dump_json(
-            model_parameters, f"model/{model_parameters['model']}/config.json", indent=4
-        )
+        dump_json(model_parameters, model_config["parametric_space_path"], indent=4)
 
 
 if __name__ == "__main__":
