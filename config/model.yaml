@@ -22,7 +22,7 @@ opt_config:
 
 parametric_space:
   - parameter: learning_rate
-    estimate: 1.1
+    estimate: 0.2278894004906563
     range:
       - 0.05
       - 1.13
@@ -30,7 +30,7 @@ parametric_space:
     type: real
 
   - parameter: n_estimators
-    estimate: 82
+    estimate: 92
     range:
       - 80
       - 120
@@ -38,7 +38,7 @@ parametric_space:
     type: integer
 
   - parameter: max_depth
-    estimate: 11
+    estimate: 16
     range:
       - 10
       - 19

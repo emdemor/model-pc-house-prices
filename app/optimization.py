@@ -4,7 +4,7 @@ import yaml
 
 from src.config import get_config
 from src.base.commons import dump_json, dump_pickle, load_json, load_yaml
-from src.model.regressor import set_regressor
+from src.model.regressor import get_model_parameters, set_regressor
 from src.optimizer import gaussian_process_optimization
 
 
@@ -14,18 +14,15 @@ from src.model.regressor import set_regressor
 
 def optimize_regressor():
 
+    # Importo as configurações do modelo
     model_config = load_yaml("config/model.yaml")
 
-    try:
-        model_parameters = load_json(f"model/{model_config['model']}/config.json")
+    model_parameters = get_model_parameters()
 
-    except:
-        for i, param in enumerate(model_config["parametric_space"]):
-            param.update({"best_value": param["estimate"]})
+    for i, param in enumerate(model_parameters["parametric_space"]):
+        param.update({"best_value": param["estimate"]})
 
-        dump_json(model_config, f"model/{model_config['model']}/config.json")
-
-        model_parameters = load_json(f"model/{model_config['model']}/config.json")
+    dump_json(model_parameters, f"model/{model_config['model']}/config.json", indent=4)
 
     hyper_param = {
         hp["parameter"]: hp["best_value"] for hp in model_parameters["parametric_space"]
