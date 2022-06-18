@@ -15,14 +15,14 @@ from src.model.data import (
 from sklearn.model_selection import train_test_split
 
 
-def train_preprocessor():
+def train_preprocessor(extract_data=False):
 
     # Getting data information
     data_config = get_config(filename="config/filepaths.yaml")
     features_config = get_config(filename="config/features.yaml")
 
     # Construct the dataset
-    raw_scrapped_features, y = get_train_dataset(data_config, extract_data=False)
+    raw_scrapped_features, y = get_train_dataset(data_config, extract_data=extract_data)
     raw_scrapped_features = add_external_data(raw_scrapped_features, data_config)
 
     X = build_features(raw_scrapped_features)
