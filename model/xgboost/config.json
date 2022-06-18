@@ -2,7 +2,7 @@
     "model": "xgboost",
     "metric": {
         "name": "mae",
-        "value": 29644.7,
+        "value": 29518.05000195557,
         "greater_is_better": false
     },
     "parametric_space": [
@@ -15,7 +15,7 @@
             ],
             "step": 0.01,
             "type": "real",
-            "best_value": 0.2278894004906563
+            "best_value": 0.16450825229945587
         },
         {
             "parameter": "n_estimators",
@@ -37,7 +37,7 @@
             ],
             "step": 1,
             "type": "integer",
-            "best_value": 16
+            "best_value": 19
         },
         {
             "parameter": "tree_method",
@@ -48,7 +48,7 @@
             ],
             "estimate": "auto",
             "type": "categorical",
-            "best_value": "auto"
+            "best_value": "approx"
         },
         {
             "parameter": "subsample",
@@ -59,7 +59,7 @@
             ],
             "step": 1,
             "type": "real",
-            "best_value": 0.99
+            "best_value": 0.9721806303121168
         },
         {
             "parameter": "colsample_bytree",
@@ -70,7 +70,7 @@
             ],
             "step": 1,
             "type": "real",
-            "best_value": 0.99
+            "best_value": 1.0
         }
     ]
 }
