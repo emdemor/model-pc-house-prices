@@ -2,7 +2,7 @@ model: xgboost
 
 metric:
   name: mae
-  value: 29644.70
+  value: 29518.05000195557,
   greater_is_better: False
 
 static_parameters:
@@ -22,7 +22,7 @@ opt_config:
 
 parametric_space:
   - parameter: learning_rate
-    estimate: 0.2278894004906563
+    estimate: 0.16450825229945587
     range:
       - 0.05
       - 1.13
@@ -38,10 +38,10 @@ parametric_space:
     type: integer
 
   - parameter: max_depth
-    estimate: 16
+    estimate: 19
     range:
-      - 10
-      - 19
+      - 15
+      - 23
     step: 1
     type: integer
 
@@ -50,11 +50,11 @@ parametric_space:
       - auto
       - approx
       - hist
-    estimate: auto
+    estimate: approx
     type: categorical
 
   - parameter: subsample
-    estimate: 0.99
+    estimate: 0.9721806303121168
     range:
       - 0.5
       - 1.0
@@ -62,7 +62,7 @@ parametric_space:
     type: real
 
   - parameter: colsample_bytree
-    estimate: 0.99
+    estimate: 1.0
     range:
       - 0.5
       - 1.0

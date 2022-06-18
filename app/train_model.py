@@ -1,6 +1,6 @@
-from app.preprocess import train_preprocessor
-from app.optimization import optimize_regressor
-from app.regression import train_regressor
+from preprocess import train_preprocessor
+from optimization import optimize_regressor
+from regression import train_regressor
 
 
 def train_model():
