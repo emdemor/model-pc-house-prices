@@ -1018,7 +1018,7 @@ class PreProcessor(BaseEstimator, TransformerMixin):
             else:
                 param = None
 
-            return FeatureImputer(strategy="constant", parameter=param)
+            return FeatureImputer(strategy=strategy, parameter=param)
 
         elif key == "discretizer":
 
