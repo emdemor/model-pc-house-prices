@@ -49,6 +49,12 @@
   imputation_strategy: constant:0
   scaler: min_max
 
+- name: iptu
+  type: float
+  limits: [40, 6000]
+  imputation_strategy: mean
+  #scaler: min_max
+
 - name: latitude
   type: float
   imputation_strategy: constant:-21.797

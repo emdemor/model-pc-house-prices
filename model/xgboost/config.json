@@ -2,13 +2,13 @@
     "model": "xgboost",
     "metric": {
         "name": "mae",
-        "value": 29518.05000195557,
+        "value": 28401.111219102004,
         "greater_is_better": false
     },
     "parametric_space": [
         {
             "parameter": "learning_rate",
-            "estimate": 0.2278894004906563,
+            "estimate": 0.16450825229945587,
             "range": [
                 0.05,
                 1.13
@@ -30,7 +30,7 @@
         },
         {
             "parameter": "max_depth",
-            "estimate": 16,
+            "estimate": 19,
             "range": [
                 10,
                 19
@@ -46,13 +46,13 @@
                 "approx",
                 "hist"
             ],
-            "estimate": "auto",
+            "estimate": "approx",
             "type": "categorical",
             "best_value": "approx"
         },
         {
             "parameter": "subsample",
-            "estimate": 0.99,
+            "estimate": 0.9721806303121168,
             "range": [
                 0.5,
                 1.0
@@ -63,7 +63,7 @@
         },
         {
             "parameter": "colsample_bytree",
-            "estimate": 0.99,
+            "estimate": 1.0,
             "range": [
                 0.5,
                 1.0

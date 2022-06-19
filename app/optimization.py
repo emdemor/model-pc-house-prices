@@ -63,7 +63,7 @@ def optimize_regressor():
 
         LOGGER.info("Optimization found a better model.")
         LOGGER.info("Update model with new parameters")
-        LOGGER.info("Update {} file".format(model_parameters["parametric_space"]))
+        LOGGER.info("Update {} file".format(model_config["parametric_space_path"]))
 
         for i, param in enumerate(model_parameters["parametric_space"]):
             param.update({"estimate": optimizer.x[i]})

@@ -6,11 +6,11 @@ static_parameters:
   random_state: null
 
 opt_config:
-  n_folds: 2
-  n_calls: 2
+  n_folds: 3
+  n_calls: 3
   n_random_starts: 1
   verbose: 1
-  random_state: 42
+  random_state: null
 
 fit_parameters:
   verbose: 0
