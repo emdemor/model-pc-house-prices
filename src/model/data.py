@@ -287,6 +287,17 @@ def sanitize_features(data: pd.DataFrame) -> pd.DataFrame:
 
     data = treat_neighborhood(data)
 
+    data = treat_iptu(data)
+
+    return data
+
+
+def treat_iptu(data: pd.DataFrame) -> pd.DataFrame:
+
+    data["iptu"] = data["iptu"].astype(float)
+
+    data["iptu"] = data["iptu"].replace(0, np.nan)
+
     return data
 
 

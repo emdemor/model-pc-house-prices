@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import logging
 import typing
+from src.base import logger
 from src.config import *
 from src.base.commons import dataframe_transformer, load_pickle
 from sklearn.base import BaseEstimator, TransformerMixin
@@ -19,6 +20,8 @@ from sklearn.pipeline import Pipeline
 
 from src.model.data import add_external_data, sanitize_features
 from src.model.features import build_features, neighbors_one_hot_encode
+
+LOGGER = logger.set()
 
 
 class Identity(BaseEstimator, TransformerMixin):
@@ -1039,13 +1042,20 @@ class PreProcessor(BaseEstimator, TransformerMixin):
 
         for column in self.feature_types:
 
-            type_ = self.feature_types[column]
+            try:
+                type_ = self.feature_types[column]
 
-            if "int" in type_.lower():
-                X[column] = X[column].round(0).astype(type_)
+                X[column] = X[column].replace("missing_value", np.nan)
 
-            else:
-                X[column] = X[column].astype(type_)
+                if "int" in type_.lower():
+                    X[column] = X[column].round(0).astype(type_)
+
+                else:
+                    X[column] = X[column].astype(type_)
+            except:
+                LOGGER.error(
+                    f"Error to cast column {column} into {self.feature_types[column]}"
+                )
 
         return X
 
