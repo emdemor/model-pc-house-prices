@@ -10,14 +10,16 @@ from sklearn.metrics import r2_score, mean_absolute_error
 def gaussian_process_optimization(X_train, y_train):
 
     model_config = load_yaml("config/model.yaml")
-    model_parameters = load_json(f"model/{model_config['model']}/config.json")
+
+    # Importando os parâmetros do modelo
+    model_parameters = load_json(model_config["parametric_space_path"])
 
     hyper_param = {
         hp["parameter"]: hp["best_value"] for hp in model_parameters["parametric_space"]
     }
 
     space = [
-        eval_parametric_space_dimension(d) for d in model_config["parametric_space"]
+        eval_parametric_space_dimension(d) for d in model_parameters["parametric_space"]
     ]
 
     x0 = list(hyper_param.values())
