@@ -4,6 +4,9 @@ __pycache__/
 *$py.class
 
 venv/
+log*
+.fuse*
+*.log
 
 data/processed/
 data/raw/

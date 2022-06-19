@@ -1,4 +1,3 @@
-from src.base.logger import logging
 import os
 import pandas as pd
 import numpy as np
@@ -7,6 +6,7 @@ from src.base.commons import to_snake_case
 from src.base.file import read_file_string, download_file
 from src.config import get_config
 from src.model import __version__
+from src.base import logger
 
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
@@ -14,6 +14,7 @@ from basix.parquet import write as to_parquet
 
 import unidecode
 
+LOGGER = logger.set()
 
 PARAMETERS_CONFIG = get_config(filename="config/parameters.yaml")
 TARGET_TRANSFORMATIONS = {
@@ -65,17 +66,17 @@ def transform_target(y: pd.Series) -> pd.Series:
 def extract_dataset(config: dict) -> None:
 
     try:
-        logging.info("Download basic features")
+        LOGGER.info("Download basic features")
         extract_scrapped_relational_data(config)
 
-        logging.info("Download amenities features")
+        LOGGER.info("Download amenities features")
         extract_scrapped_amenities_data(config)
 
-        logging.info("Download descriptions")
+        LOGGER.info("Download descriptions")
         extract_scrapped_description_data(config)
 
     except Exception as err:
-        logging.error(err)
+        LOGGER.error(err)
         raise Exception
 
 

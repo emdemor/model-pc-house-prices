@@ -1,4 +1,4 @@
-from src.base.logger import logging
+from src.base import logger
 import unidecode
 from typing import Any
 import numpy as np
@@ -8,18 +8,23 @@ from src.config import get_config
 import unidecode
 from src.base.commons import to_snake_case
 
+LOGGER = logger.set()
 
 PARAMETERS_CONFIG = get_config(filename="config/parameters.yaml")
 
 
 def build_features(data: pd.DataFrame) -> pd.DataFrame:
 
+    LOGGER.info("Build features related to state type")
     data = build_type_features(data)
 
+    LOGGER.info("Build features related to date")
     data = build_date_features(data)
 
+    LOGGER.info("Build features related to latitude and longitude")
     data = fill_latlong_by_neighbor(data)
 
+    LOGGER.info("Build features related to distances")
     data = build_distance_features(data)
 
     return data
