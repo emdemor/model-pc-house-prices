@@ -1,4 +1,5 @@
 from src.base.commons import load_json, load_yaml
+from src.base import logger
 from src.model.regressor import set_regressor
 from src.optimizer.space import eval_parametric_space_dimension
 from skopt import gp_minimize
@@ -6,12 +7,15 @@ from skopt.utils import use_named_args
 from src.optimizer.cross_validation import cross_validate_score
 from sklearn.metrics import r2_score, mean_absolute_error
 
+LOGGER = logger.set()
+
 
 def gaussian_process_optimization(X_train, y_train):
 
+    LOGGER.info("FUNCTION: gaussian_process_optimization")
+
     model_config = load_yaml("config/model.yaml")
 
-    # Importando os parâmetros do modelo
     model_parameters = load_json(model_config["parametric_space_path"])
 
     hyper_param = {
@@ -57,13 +61,5 @@ def gaussian_process_optimization(X_train, y_train):
     )
 
     model_config["fit_parameters"]["eval_set"] = None
-
-    # for i, param in enumerate(model_config["parametric_space"]):
-    #     param.update({"optimal_value": res_gp.x[i]})
-
-    # return {
-    #     "best_parameters": dict(zip(hyper_param.keys(), res_gp.x)),
-    #     "best_score": res_gp.fun,
-    # }
 
     return res_gp

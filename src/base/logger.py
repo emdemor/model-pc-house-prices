@@ -1,7 +1,12 @@
 import logging
 
-if __name__ != "__main__":
+
+def set():
+
     logging.basicConfig(
-        level=logging.WARNING,
-        format="\n(%(asctime)s)\n[%(levelname)s] %(message)s",
+        level=logging.INFO,
+        format="%(asctime)s [%(levelname)s] %(message)s",
+        handlers=[logging.FileHandler("logs.txt"), logging.StreamHandler()],
     )
+
+    return logging.getLogger()
