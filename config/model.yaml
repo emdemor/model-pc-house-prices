@@ -7,7 +7,7 @@ static_parameters:
 
 opt_config:
   n_folds: 3
-  n_calls: 15
+  n_calls: 480
   n_random_starts: 1
   verbose: 1
   random_state: null
