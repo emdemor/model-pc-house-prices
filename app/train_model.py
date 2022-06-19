@@ -5,13 +5,15 @@ from app.regression import train_regressor
 
 LOGGER = logger.set()
 
+EXTRACT_DATA = False
+
 
 def train_model():
 
     LOGGER.info("FUNCTION: train_model")
 
     # Train the preprocess pipeline
-    train_preprocessor(extract_data=True)
+    train_preprocessor(extract_data=EXTRACT_DATA)
 
     # Otimizar parametros
     optimize_regressor()
